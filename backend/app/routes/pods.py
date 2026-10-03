@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..dependencies import get_current_user
 from ..models import Pod, User
 from ..permissions import require_organization_capability
 from ..schemas import PodCreate
@@ -13,22 +12,40 @@ router = APIRouter(
 )
 
 
-@router.get("/")
-def list_pods(
-    current_user: User = Depends(get_current_user),
+@router.get(
+    "/organization/{organization_id}",
+)
+def list_organization_pods(
+    organization_id: int,
+    membership=Depends(
+        require_organization_capability("organization.view")
+    ),
     db: Session = Depends(get_db),
 ):
-    return db.query(Pod).all()
+    return (
+        db.query(Pod)
+        .filter(
+            Pod.organization_id == organization_id,
+        )
+        .order_by(Pod.name)
+        .all()
+    )
 
 
-@router.post("/")
-def create_pod(
+@router.post(
+    "/organization/{organization_id}",
+)
+def create_organization_pod(
+    organization_id: int,
     pod_data: PodCreate,
-    current_user: User = Depends(get_current_user),
+    membership=Depends(
+        require_organization_capability("pod.create")
+    ),
     db: Session = Depends(get_db),
 ):
     pod = Pod(
-        name=pod_data.name,
+        organization_id=organization_id,
+        name=pod_data.name.strip(),
         description=pod_data.description,
         guide_id=pod_data.guide_id,
     )

@@ -2,9 +2,11 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..dependencies import require_roles
-from ..models import User
-
+from ..models import (
+    OrganizationMembership,
+    User,
+)
+from ..permissions import require_organization_capability
 
 router = APIRouter(
     prefix="/api/learners",
@@ -12,20 +14,29 @@ router = APIRouter(
 )
 
 
-@router.get("/")
-def list_learners(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(
-        require_roles(
-            "guide",
-            "organization_admin",
-            "platform_admin",
-        )
+@router.get(
+    "/organization/{organization_id}",
+)
+def list_organization_learners(
+    organization_id: int,
+    membership=Depends(
+        require_organization_capability("learner.view")
     ),
+    db: Session = Depends(get_db),
 ):
     learners = (
         db.query(User)
-        .filter(User.role == "learner")
+        .join(
+            OrganizationMembership,
+            OrganizationMembership.user_id == User.id,
+        )
+        .filter(
+            OrganizationMembership.organization_id == organization_id,
+            OrganizationMembership.active.is_(True),
+            User.role == "learner",
+            User.active.is_(True),
+        )
+        .order_by(User.name)
         .all()
     )
 

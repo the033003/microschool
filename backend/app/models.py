@@ -173,8 +173,24 @@ class OrganizationInvitation(Base):
 class Pod(Base):
     __tablename__ = "pods"
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True,
+    )
+
+    organization_id = Column(
+        Integer,
+        ForeignKey("organizations.id"),
+        nullable=True,
+        index=True,
+    )
+
+    name = Column(
+        String,
+        nullable=False,
+    )
+
     description = Column(Text)
 
     guide_id = Column(
@@ -183,6 +199,7 @@ class Pod(Base):
         nullable=True,
     )
 
+    organization = relationship("Organization")
     guide = relationship("User")
 
     created_at = Column(
@@ -287,4 +304,5 @@ class Attendance(Base):
     )
 
     present = Column(Boolean, default=True)
+
     notes = Column(Text)

@@ -71,7 +71,7 @@ class InvitationAccept(BaseModel):
 
 
 class PodCreate(BaseModel):
-    name: str
+    name: str = Field(min_length=2, max_length=160)
     description: Optional[str] = None
     guide_id: Optional[int] = None
 
