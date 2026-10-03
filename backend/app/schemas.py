@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserCreate(BaseModel):
@@ -11,20 +11,63 @@ class UserCreate(BaseModel):
 
 
 class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     email: str
     role: str
     active: bool
 
-    class Config:
-        from_attributes = True
-
 
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserResponse
+
+
+class OrganizationCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=160)
+    slug: str = Field(min_length=2, max_length=80)
+    description: Optional[str] = None
+
+
+class OrganizationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    slug: str
+    description: Optional[str]
+    active: bool
+
+
+class MembershipResponse(BaseModel):
+    id: int
+    organization_id: int
+    user_id: int
+    role: str
+    active: bool
+    user_name: str
+    user_email: str
+
+
+class InvitationCreate(BaseModel):
+    email: EmailStr
+    role: str = "member"
+
+
+class InvitationResponse(BaseModel):
+    id: int
+    organization_id: int
+    email: str
+    role: str
+    expires_at: str
+    token: str
+
+
+class InvitationAccept(BaseModel):
+    token: str
 
 
 class PodCreate(BaseModel):

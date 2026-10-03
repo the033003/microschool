@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..dependencies import require_roles
+from ..dependencies import get_current_user
 from ..models import Pod, User
+from ..permissions import require_organization_capability
 from ..schemas import PodCreate
-
 
 router = APIRouter(
     prefix="/api/pods",
@@ -15,14 +15,8 @@ router = APIRouter(
 
 @router.get("/")
 def list_pods(
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        require_roles(
-            "guide",
-            "organization_admin",
-            "platform_admin",
-        )
-    ),
 ):
     return db.query(Pod).all()
 
@@ -30,14 +24,8 @@ def list_pods(
 @router.post("/")
 def create_pod(
     pod_data: PodCreate,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        require_roles(
-            "guide",
-            "organization_admin",
-            "platform_admin",
-        )
-    ),
 ):
     pod = Pod(
         name=pod_data.name,

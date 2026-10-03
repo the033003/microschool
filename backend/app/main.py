@@ -9,24 +9,22 @@ from .routes import (
     auth,
     courses,
     learners,
+    organizations,
     pods,
     progress,
 )
 
-
 Base.metadata.create_all(bind=engine)
-
 
 app = FastAPI(
     title="Microschool Platform",
-    version="0.2.0",
+    version="0.3.0",
     description=(
         "A plug-and-play platform for operating microschools "
         "and connecting people with reusable learning and "
         "operational resources."
     ),
 )
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -36,8 +34,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 app.include_router(auth.router)
+app.include_router(organizations.router)
 app.include_router(learners.router)
 app.include_router(pods.router)
 app.include_router(courses.router)
@@ -49,14 +47,11 @@ def health():
     return {
         "status": "ok",
         "application": "Microschool",
-        "version": "0.2.0",
+        "version": "0.3.0",
     }
 
 
-frontend_path = (
-    Path(__file__).resolve().parents[2]
-    / "frontend"
-)
+frontend_path = Path(__file__).resolve().parents[2] / "frontend"
 
 app.mount(
     "/",
