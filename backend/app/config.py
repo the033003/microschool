@@ -1,12 +1,15 @@
 from pathlib import Path
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_ROOT / "data"
 
-DATA_DIR.mkdir(parents=True, exist_ok=True)
+DATA_DIR.mkdir(
+    parents=True,
+    exist_ok=True,
+)
 
 
 class Settings(BaseSettings):
@@ -17,8 +20,11 @@ class Settings(BaseSettings):
         f"sqlite:///{DATA_DIR / 'microschool.db'}"
     )
 
-    class Config:
-        env_file = PROJECT_ROOT / ".env"
+    model_config = SettingsConfigDict(
+        env_file=PROJECT_ROOT / ".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
 
 settings = Settings()

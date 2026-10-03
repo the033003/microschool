@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import Course, Lesson
+from ..dependencies import require_roles
+from ..models import Course, Lesson, User
 from ..schemas import CourseCreate, LessonCreate
 
 
@@ -15,14 +16,37 @@ router = APIRouter(
 @router.get("/")
 def list_courses(
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(
+            "learner",
+            "parent",
+            "guide",
+            "content_author",
+            "content_editor",
+            "content_admin",
+            "organization_admin",
+            "platform_admin",
+        )
+    ),
 ):
-    return db.query(Course).all()
+    return db.query(Course).filter(
+        Course.active == True
+    ).all()
 
 
 @router.post("/")
 def create_course(
     course_data: CourseCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(
+            "content_author",
+            "content_editor",
+            "content_admin",
+            "organization_admin",
+            "platform_admin",
+        )
+    ),
 ):
     course = Course(
         title=course_data.title,
@@ -43,7 +67,28 @@ def create_lesson(
     course_id: int,
     lesson_data: LessonCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(
+            "content_author",
+            "content_editor",
+            "content_admin",
+            "organization_admin",
+            "platform_admin",
+        )
+    ),
 ):
+    course = db.query(Course).filter(
+        Course.id == course_id
+    ).first()
+
+    if not course:
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
     lesson = Lesson(
         course_id=course_id,
         title=lesson_data.title,

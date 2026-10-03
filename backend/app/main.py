@@ -5,7 +5,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .database import Base, engine
-
 from .routes import (
     auth,
     courses,
@@ -19,8 +18,13 @@ Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI(
-    title="Microschool Learning Platform",
-    version="0.1.0",
+    title="Microschool Platform",
+    version="0.2.0",
+    description=(
+        "A plug-and-play platform for operating microschools "
+        "and connecting people with reusable learning and "
+        "operational resources."
+    ),
 )
 
 
@@ -45,6 +49,7 @@ def health():
     return {
         "status": "ok",
         "application": "Microschool",
+        "version": "0.2.0",
     }
 
 

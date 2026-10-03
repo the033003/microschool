@@ -588,23 +588,3 @@ Known warning:
   regarding the installed httpx version. This does not currently
   prevent tests from running, but the test dependency stack should be
   modernized during the next dependency cleanup.
-
-## Build 004.2 — Dependency and Configuration Cleanup
-
-Date: 2026-10-03
-
-Changes:
-
-- Added email-validator through the pydantic[email] dependency.
-- Added python-multipart for FastAPI form-based authentication.
-- Removed the deprecated Pydantic class-based Config syntax.
-- Migrated Settings configuration to SettingsConfigDict.
-- Kept the database path anchored to the project root.
-- Replaced the previous dependency list with the dependencies actually
-  required by the current application.
-
-Known:
-
-- The installed Starlette/httpx combination may still report a
-  TestClient deprecation warning. This will be addressed separately
-  after the application test suite is executing successfully.
